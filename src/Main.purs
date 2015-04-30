@@ -3,8 +3,11 @@ module Main where
 import Debug.Trace
 
 import Data.Maybe
+import Data.Array
 import Data.Tuple
 import Data.Foldable (foldl)
+
+import Control.MonadPlus
 
 import Control.Monad.Eff
 
@@ -124,12 +127,17 @@ cube x0 x1 y0 y1 z0 z1 =
   ]
 
 scene :: Number -> [R]
-scene t = 
-  let h t = Math.sin t * 50 + 100
-  in cube   0 100   0 100 (h t) 200 ++ 
-     cube   0 100 100 200 (h (Math.pi * 0.5 + t)) 200 ++
-     cube 100 200 100 200 (h (Math.pi + t)) 200 ++
-     cube 100 200   0 100 (h (Math.pi * 1.5 + t)) 200
+scene t = do
+  let s = Math.sin (0.5 * t) * 10.0 + 30.0
+  x <- 0 .. 5
+  y <- 0 .. 5
+  z <- 0 .. 5
+  guard $ Math.sin (x + t * 2.1) + 
+          Math.sin (y + t * 2.2) + 
+          Math.cos (z + t * 2.3) > 1.0
+  cube (x * s) (x * s + s)
+       (y * s) (y * s + s)
+       (z * s) (z * s + s)
 
 foreign import fortyFps 
   "function fortyFps(f) {\
@@ -153,9 +161,9 @@ main = do
   render :: Context2D -> R -> Eff _ Unit
   render ctx r = do
     case r of
-      XY _ -> setFillStyle "rgba(48, 196, 255, 0.5)" ctx
-      YZ _ -> setFillStyle "rgba(24, 144, 200, 0.5)" ctx
-      ZX _ -> setFillStyle "rgba(0 , 128, 196, 0.5)" ctx
+      XY _ -> setFillStyle "rgba(48, 196, 255, 1.0)" ctx
+      YZ _ -> setFillStyle "rgba(24, 144, 200, 1.0)" ctx
+      ZX _ -> setFillStyle "rgba(0 , 128, 196, 1.0)" ctx
     case toPoints r of
       [p1, p2, p3, p4] -> void do
         beginPath ctx

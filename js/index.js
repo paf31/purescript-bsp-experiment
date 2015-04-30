@@ -3116,12 +3116,13 @@ module.exports = {
 var Prelude = require("Prelude");
 var Data_Foldable = require("Data.Foldable");
 var $$Math = require("Math");
+var Data_Array = require("Data.Array");
+var Control_MonadPlus = require("Control.MonadPlus");
 var Graphics_Canvas = require("Graphics.Canvas");
 var Debug_Trace = require("Debug.Trace");
 var Data_Maybe = require("Data.Maybe");
 var Data_Tuple = require("Data.Tuple");
 var Control_Monad_Eff = require("Control.Monad.Eff");
-var Data_Array = require("Data.Array");
 function fortyFps(f) {  return function() {    window.setInterval(function() {      f(new Date().getTime() / 1000.0)();    }, 25);  };};
 var Front = (function () {
     function Front() {
@@ -3199,117 +3200,117 @@ var Branch = (function () {
     return Branch;
 })();
 var view = function (render) {
-    var go = function (_8) {
-        if (_8 instanceof Leaf) {
+    var go = function (_11) {
+        if (_11 instanceof Leaf) {
             return Prelude["return"](Control_Monad_Eff.monadEff)(Prelude.unit);
         };
-        if (_8 instanceof Branch && _8.value1 instanceof XY) {
+        if (_11 instanceof Branch && _11.value1 instanceof XY) {
             return function __do() {
-                go(_8.value2)();
-                render(_8.value1)();
-                return go(_8.value0)();
+                go(_11.value2)();
+                render(_11.value1)();
+                return go(_11.value0)();
             };
         };
-        if (_8 instanceof Branch && _8.value1 instanceof YZ) {
+        if (_11 instanceof Branch && _11.value1 instanceof YZ) {
             return function __do() {
-                go(_8.value2)();
-                render(_8.value1)();
-                return go(_8.value0)();
+                go(_11.value2)();
+                render(_11.value1)();
+                return go(_11.value0)();
             };
         };
-        if (_8 instanceof Branch && _8.value1 instanceof ZX) {
+        if (_11 instanceof Branch && _11.value1 instanceof ZX) {
             return function __do() {
-                go(_8.value2)();
-                render(_8.value1)();
-                return go(_8.value0)();
+                go(_11.value2)();
+                render(_11.value1)();
+                return go(_11.value0)();
             };
         };
         throw new Error("Failed pattern match");
     };
     return go;
 };
-var toPoints = function (_2) {
-    if (_2 instanceof XY) {
+var toPoints = function (_5) {
+    if (_5 instanceof XY) {
         return [ {
-            x: _2.value0.x.min, 
-            y: _2.value0.y.min, 
-            z: _2.value0.z
+            x: _5.value0.x.min, 
+            y: _5.value0.y.min, 
+            z: _5.value0.z
         }, {
-            x: _2.value0.x.min, 
-            y: _2.value0.y.max, 
-            z: _2.value0.z
+            x: _5.value0.x.min, 
+            y: _5.value0.y.max, 
+            z: _5.value0.z
         }, {
-            x: _2.value0.x.max, 
-            y: _2.value0.y.max, 
-            z: _2.value0.z
+            x: _5.value0.x.max, 
+            y: _5.value0.y.max, 
+            z: _5.value0.z
         }, {
-            x: _2.value0.x.max, 
-            y: _2.value0.y.min, 
-            z: _2.value0.z
+            x: _5.value0.x.max, 
+            y: _5.value0.y.min, 
+            z: _5.value0.z
         } ];
     };
-    if (_2 instanceof YZ) {
+    if (_5 instanceof YZ) {
         return [ {
-            x: _2.value0.x, 
-            y: _2.value0.y.min, 
-            z: _2.value0.z.min
+            x: _5.value0.x, 
+            y: _5.value0.y.min, 
+            z: _5.value0.z.min
         }, {
-            x: _2.value0.x, 
-            y: _2.value0.y.min, 
-            z: _2.value0.z.max
+            x: _5.value0.x, 
+            y: _5.value0.y.min, 
+            z: _5.value0.z.max
         }, {
-            x: _2.value0.x, 
-            y: _2.value0.y.max, 
-            z: _2.value0.z.max
+            x: _5.value0.x, 
+            y: _5.value0.y.max, 
+            z: _5.value0.z.max
         }, {
-            x: _2.value0.x, 
-            y: _2.value0.y.max, 
-            z: _2.value0.z.min
+            x: _5.value0.x, 
+            y: _5.value0.y.max, 
+            z: _5.value0.z.min
         } ];
     };
-    if (_2 instanceof ZX) {
+    if (_5 instanceof ZX) {
         return [ {
-            x: _2.value0.x.min, 
-            y: _2.value0.y, 
-            z: _2.value0.z.min
+            x: _5.value0.x.min, 
+            y: _5.value0.y, 
+            z: _5.value0.z.min
         }, {
-            x: _2.value0.x.min, 
-            y: _2.value0.y, 
-            z: _2.value0.z.max
+            x: _5.value0.x.min, 
+            y: _5.value0.y, 
+            z: _5.value0.z.max
         }, {
-            x: _2.value0.x.max, 
-            y: _2.value0.y, 
-            z: _2.value0.z.max
+            x: _5.value0.x.max, 
+            y: _5.value0.y, 
+            z: _5.value0.z.max
         }, {
-            x: _2.value0.x.max, 
-            y: _2.value0.y, 
-            z: _2.value0.z.min
+            x: _5.value0.x.max, 
+            y: _5.value0.y, 
+            z: _5.value0.z.min
         } ];
     };
     throw new Error("Failed pattern match");
 };
-var showR = new Prelude.Show(function (_3) {
-    if (_3 instanceof XY) {
-        return "(XY [" + (Prelude.show(Prelude.showNumber)(_3.value0.x.min) + (", " + (Prelude.show(Prelude.showNumber)(_3.value0.x.max) + ("]" + (", [" + (Prelude.show(Prelude.showNumber)(_3.value0.y.min) + (", " + (Prelude.show(Prelude.showNumber)(_3.value0.y.max) + ("]" + (", " + (Prelude.show(Prelude.showNumber)(_3.value0.z) + ")")))))))))));
+var showR = new Prelude.Show(function (_6) {
+    if (_6 instanceof XY) {
+        return "(XY [" + (Prelude.show(Prelude.showNumber)(_6.value0.x.min) + (", " + (Prelude.show(Prelude.showNumber)(_6.value0.x.max) + ("]" + (", [" + (Prelude.show(Prelude.showNumber)(_6.value0.y.min) + (", " + (Prelude.show(Prelude.showNumber)(_6.value0.y.max) + ("]" + (", " + (Prelude.show(Prelude.showNumber)(_6.value0.z) + ")")))))))))));
     };
-    if (_3 instanceof YZ) {
-        return "(YZ " + (Prelude.show(Prelude.showNumber)(_3.value0.x) + (", [" + (Prelude.show(Prelude.showNumber)(_3.value0.y.min) + (", " + (Prelude.show(Prelude.showNumber)(_3.value0.y.max) + ("]" + (", [" + (Prelude.show(Prelude.showNumber)(_3.value0.z.min) + (", " + (Prelude.show(Prelude.showNumber)(_3.value0.z.max) + "])"))))))))));
+    if (_6 instanceof YZ) {
+        return "(YZ " + (Prelude.show(Prelude.showNumber)(_6.value0.x) + (", [" + (Prelude.show(Prelude.showNumber)(_6.value0.y.min) + (", " + (Prelude.show(Prelude.showNumber)(_6.value0.y.max) + ("]" + (", [" + (Prelude.show(Prelude.showNumber)(_6.value0.z.min) + (", " + (Prelude.show(Prelude.showNumber)(_6.value0.z.max) + "])"))))))))));
     };
-    if (_3 instanceof ZX) {
-        return "(ZX [" + (Prelude.show(Prelude.showNumber)(_3.value0.x.min) + (", " + (Prelude.show(Prelude.showNumber)(_3.value0.x.max) + ("]" + (", " + (Prelude.show(Prelude.showNumber)(_3.value0.y) + (", [" + (Prelude.show(Prelude.showNumber)(_3.value0.z.min) + (", " + (Prelude.show(Prelude.showNumber)(_3.value0.z.max) + "])"))))))))));
+    if (_6 instanceof ZX) {
+        return "(ZX [" + (Prelude.show(Prelude.showNumber)(_6.value0.x.min) + (", " + (Prelude.show(Prelude.showNumber)(_6.value0.x.max) + ("]" + (", " + (Prelude.show(Prelude.showNumber)(_6.value0.y) + (", [" + (Prelude.show(Prelude.showNumber)(_6.value0.z.min) + (", " + (Prelude.show(Prelude.showNumber)(_6.value0.z.max) + "])"))))))))));
     };
     throw new Error("Failed pattern match");
 });
 var functorSplit = new Prelude.Functor(function (f) {
-    return function (_4) {
-        if (_4 instanceof Front) {
+    return function (_7) {
+        if (_7 instanceof Front) {
             return Front.value;
         };
-        if (_4 instanceof Back) {
+        if (_7 instanceof Back) {
             return Back.value;
         };
-        if (_4 instanceof Split) {
-            return new Split(f(_4.value0), f(_4.value1));
+        if (_7 instanceof Split) {
+            return new Split(f(_7.value0), f(_7.value1));
         };
         throw new Error("Failed pattern match");
     };
@@ -3388,10 +3389,16 @@ var cube = function (x0) {
     };
 };
 var scene = function (t) {
-    var h = function (t_1) {
-        return $$Math.sin(t_1) * 50 + 100;
-    };
-    return Prelude["++"](Data_Array.semigroupArray)(cube(0)(100)(0)(100)(h(t))(200))(Prelude["++"](Data_Array.semigroupArray)(cube(0)(100)(100)(200)(h($$Math.pi * 0.5 + t))(200))(Prelude["++"](Data_Array.semigroupArray)(cube(100)(200)(100)(200)(h($$Math.pi + t))(200))(cube(100)(200)(0)(100)(h($$Math.pi * 1.5 + t))(200))));
+    var s = $$Math.sin(0.5 * t) * 10.0 + 30.0;
+    return Prelude[">>="](Data_Array.bindArray)(Data_Array[".."](0)(5))(function (_2) {
+        return Prelude[">>="](Data_Array.bindArray)(Data_Array[".."](0)(5))(function (_1) {
+            return Prelude[">>="](Data_Array.bindArray)(Data_Array[".."](0)(5))(function (_0) {
+                return Prelude[">>="](Data_Array.bindArray)(Control_MonadPlus.guard(Data_Array.monadPlusArray)($$Math.sin(_2 + t * 2.1) + $$Math.sin(_1 + t * 2.2) + $$Math.cos(_0 + t * 2.3) > 1.0))(function () {
+                    return cube(_2 * s)(_2 * s + s)(_1 * s)(_1 * s + s)(_0 * s)(_0 * s + s);
+                });
+            });
+        });
+    });
 };
 var buildTree = (function () {
     var splitZ = function (o) {
@@ -3404,29 +3411,29 @@ var buildTree = (function () {
             };
             if (Prelude.otherwise) {
                 return new Split((function () {
-                    var _36 = {};
-                    for (var _37 in o) {
-                        if (o.hasOwnProperty(_37)) {
-                            _36[_37] = o[_37];
+                    var _42 = {};
+                    for (var _43 in o) {
+                        if (o.hasOwnProperty(_43)) {
+                            _42[_43] = o[_43];
                         };
                     };
-                    _36.z = {
+                    _42.z = {
                         min: o.z.min, 
                         max: z
                     };
-                    return _36;
+                    return _42;
                 })(), (function () {
-                    var _38 = {};
-                    for (var _39 in o) {
-                        if (o.hasOwnProperty(_39)) {
-                            _38[_39] = o[_39];
+                    var _44 = {};
+                    for (var _45 in o) {
+                        if (o.hasOwnProperty(_45)) {
+                            _44[_45] = o[_45];
                         };
                     };
-                    _38.z = {
+                    _44.z = {
                         max: o.z.max, 
                         min: z
                     };
-                    return _38;
+                    return _44;
                 })());
             };
             throw new Error("Failed pattern match");
@@ -3442,29 +3449,29 @@ var buildTree = (function () {
             };
             if (Prelude.otherwise) {
                 return new Split((function () {
-                    var _42 = {};
-                    for (var _43 in o) {
-                        if (o.hasOwnProperty(_43)) {
-                            _42[_43] = o[_43];
+                    var _48 = {};
+                    for (var _49 in o) {
+                        if (o.hasOwnProperty(_49)) {
+                            _48[_49] = o[_49];
                         };
                     };
-                    _42.y = {
+                    _48.y = {
                         max: o.y.max, 
                         min: y
                     };
-                    return _42;
+                    return _48;
                 })(), (function () {
-                    var _44 = {};
-                    for (var _45 in o) {
-                        if (o.hasOwnProperty(_45)) {
-                            _44[_45] = o[_45];
+                    var _50 = {};
+                    for (var _51 in o) {
+                        if (o.hasOwnProperty(_51)) {
+                            _50[_51] = o[_51];
                         };
                     };
-                    _44.y = {
+                    _50.y = {
                         min: o.y.min, 
                         max: y
                     };
-                    return _44;
+                    return _50;
                 })());
             };
             throw new Error("Failed pattern match");
@@ -3480,72 +3487,72 @@ var buildTree = (function () {
             };
             if (Prelude.otherwise) {
                 return new Split((function () {
-                    var _48 = {};
-                    for (var _49 in o) {
-                        if (o.hasOwnProperty(_49)) {
-                            _48[_49] = o[_49];
+                    var _54 = {};
+                    for (var _55 in o) {
+                        if (o.hasOwnProperty(_55)) {
+                            _54[_55] = o[_55];
                         };
                     };
-                    _48.x = {
+                    _54.x = {
                         max: o.x.max, 
                         min: x
                     };
-                    return _48;
+                    return _54;
                 })(), (function () {
-                    var _50 = {};
-                    for (var _51 in o) {
-                        if (o.hasOwnProperty(_51)) {
-                            _50[_51] = o[_51];
+                    var _56 = {};
+                    for (var _57 in o) {
+                        if (o.hasOwnProperty(_57)) {
+                            _56[_57] = o[_57];
                         };
                     };
-                    _50.x = {
+                    _56.x = {
                         min: o.x.min, 
                         max: x
                     };
-                    return _50;
+                    return _56;
                 })());
             };
             throw new Error("Failed pattern match");
         };
     };
-    var splitOn = function (_6) {
-        return function (_7) {
-            if (_6 instanceof XY && _7 instanceof XY) {
-                if (_6.value0.z >= _7.value0.z) {
+    var splitOn = function (_9) {
+        return function (_10) {
+            if (_9 instanceof XY && _10 instanceof XY) {
+                if (_9.value0.z >= _10.value0.z) {
                     return Back.value;
                 };
                 if (Prelude.otherwise) {
                     return Front.value;
                 };
             };
-            if (_6 instanceof XY && _7 instanceof YZ) {
-                return Prelude["<$>"](functorSplit)(XY.create)(splitX(_6.value0)(_7.value0.x));
+            if (_9 instanceof XY && _10 instanceof YZ) {
+                return Prelude["<$>"](functorSplit)(XY.create)(splitX(_9.value0)(_10.value0.x));
             };
-            if (_6 instanceof XY && _7 instanceof ZX) {
-                return Prelude["<$>"](functorSplit)(XY.create)(splitY(_6.value0)(_7.value0.y));
+            if (_9 instanceof XY && _10 instanceof ZX) {
+                return Prelude["<$>"](functorSplit)(XY.create)(splitY(_9.value0)(_10.value0.y));
             };
-            if (_6 instanceof YZ && _7 instanceof XY) {
-                return Prelude["<$>"](functorSplit)(YZ.create)(splitZ(_6.value0)(_7.value0.z));
+            if (_9 instanceof YZ && _10 instanceof XY) {
+                return Prelude["<$>"](functorSplit)(YZ.create)(splitZ(_9.value0)(_10.value0.z));
             };
-            if (_6 instanceof YZ && _7 instanceof YZ) {
-                if (_6.value0.x >= _7.value0.x) {
+            if (_9 instanceof YZ && _10 instanceof YZ) {
+                if (_9.value0.x >= _10.value0.x) {
                     return Front.value;
                 };
                 if (Prelude.otherwise) {
                     return Back.value;
                 };
             };
-            if (_6 instanceof YZ && _7 instanceof ZX) {
-                return Prelude["<$>"](functorSplit)(YZ.create)(splitY(_6.value0)(_7.value0.y));
+            if (_9 instanceof YZ && _10 instanceof ZX) {
+                return Prelude["<$>"](functorSplit)(YZ.create)(splitY(_9.value0)(_10.value0.y));
             };
-            if (_6 instanceof ZX && _7 instanceof XY) {
-                return Prelude["<$>"](functorSplit)(ZX.create)(splitZ(_6.value0)(_7.value0.z));
+            if (_9 instanceof ZX && _10 instanceof XY) {
+                return Prelude["<$>"](functorSplit)(ZX.create)(splitZ(_9.value0)(_10.value0.z));
             };
-            if (_6 instanceof ZX && _7 instanceof YZ) {
-                return Prelude["<$>"](functorSplit)(ZX.create)(splitX(_6.value0)(_7.value0.x));
+            if (_9 instanceof ZX && _10 instanceof YZ) {
+                return Prelude["<$>"](functorSplit)(ZX.create)(splitX(_9.value0)(_10.value0.x));
             };
-            if (_6 instanceof ZX && _7 instanceof ZX) {
-                if (_6.value0.y >= _7.value0.y) {
+            if (_9 instanceof ZX && _10 instanceof ZX) {
+                if (_9.value0.y >= _10.value0.y) {
                     return Front.value;
                 };
                 if (Prelude.otherwise) {
@@ -3555,21 +3562,21 @@ var buildTree = (function () {
             throw new Error("Failed pattern match");
         };
     };
-    var pushDown = function (_5) {
+    var pushDown = function (_8) {
         return function (r) {
-            if (_5 instanceof Leaf) {
+            if (_8 instanceof Leaf) {
                 return new Branch(Leaf.value, r, Leaf.value);
             };
-            if (_5 instanceof Branch) {
-                var _74 = splitOn(r)(_5.value1);
-                if (_74 instanceof Front) {
-                    return new Branch(pushDown(_5.value0)(r), _5.value1, _5.value2);
+            if (_8 instanceof Branch) {
+                var _80 = splitOn(r)(_8.value1);
+                if (_80 instanceof Front) {
+                    return new Branch(pushDown(_8.value0)(r), _8.value1, _8.value2);
                 };
-                if (_74 instanceof Back) {
-                    return new Branch(_5.value0, _5.value1, pushDown(_5.value2)(r));
+                if (_80 instanceof Back) {
+                    return new Branch(_8.value0, _8.value1, pushDown(_8.value2)(r));
                 };
-                if (_74 instanceof Split) {
-                    return new Branch(pushDown(_5.value0)(_74.value0), _5.value1, pushDown(_5.value2)(_74.value1));
+                if (_80 instanceof Split) {
+                    return new Branch(pushDown(_8.value0)(_80.value0), _8.value1, pushDown(_8.value2)(_80.value1));
                 };
                 throw new Error("Failed pattern match");
             };
@@ -3590,8 +3597,8 @@ var main = (function () {
     var l2 = function (ctx) {
         return function (f) {
             return function (p) {
-                var _80 = project(p);
-                return f(ctx)(_80.x)(_80.y);
+                var _86 = project(p);
+                return f(ctx)(_86.x)(_86.y);
             };
         };
     };
@@ -3600,24 +3607,24 @@ var main = (function () {
             return function __do() {
                 (function () {
                     if (r instanceof XY) {
-                        return Graphics_Canvas.setFillStyle("rgba(48, 196, 255, 0.5)")(ctx);
+                        return Graphics_Canvas.setFillStyle("rgba(48, 196, 255, 1.0)")(ctx);
                     };
                     if (r instanceof YZ) {
-                        return Graphics_Canvas.setFillStyle("rgba(24, 144, 200, 0.5)")(ctx);
+                        return Graphics_Canvas.setFillStyle("rgba(24, 144, 200, 1.0)")(ctx);
                     };
                     if (r instanceof ZX) {
-                        return Graphics_Canvas.setFillStyle("rgba(0 , 128, 196, 0.5)")(ctx);
+                        return Graphics_Canvas.setFillStyle("rgba(0 , 128, 196, 1.0)")(ctx);
                     };
                     throw new Error("Failed pattern match");
                 })()();
-                var _85 = toPoints(r);
-                if (_85.length === 4) {
+                var _91 = toPoints(r);
+                if (_91.length === 4) {
                     return Prelude["void"](Control_Monad_Eff.functorEff)(function __do() {
                         Graphics_Canvas.beginPath(ctx)();
-                        l2(ctx)(Graphics_Canvas.moveTo)(_85[0])();
-                        l2(ctx)(Graphics_Canvas.lineTo)(_85[1])();
-                        l2(ctx)(Graphics_Canvas.lineTo)(_85[2])();
-                        l2(ctx)(Graphics_Canvas.lineTo)(_85[3])();
+                        l2(ctx)(Graphics_Canvas.moveTo)(_91[0])();
+                        l2(ctx)(Graphics_Canvas.lineTo)(_91[1])();
+                        l2(ctx)(Graphics_Canvas.lineTo)(_91[2])();
+                        l2(ctx)(Graphics_Canvas.lineTo)(_91[3])();
                         Graphics_Canvas.closePath(ctx)();
                         return Graphics_Canvas.fill(ctx)();
                     })();
@@ -3627,19 +3634,19 @@ var main = (function () {
         };
     };
     return function __do() {
-        var _1 = Graphics_Canvas.getCanvasElementById("canvas")();
-        if (_1 instanceof Data_Maybe.Just) {
-            var _0 = Graphics_Canvas.getContext2D(_1.value0)();
+        var _4 = Graphics_Canvas.getCanvasElementById("canvas")();
+        if (_4 instanceof Data_Maybe.Just) {
+            var _3 = Graphics_Canvas.getContext2D(_4.value0)();
             return fortyFps(function (t) {
                 return function __do() {
-                    Graphics_Canvas.clearRect(_0)({
+                    Graphics_Canvas.clearRect(_3)({
                         x: 0, 
                         y: 0, 
                         w: 600, 
                         h: 600
                     })();
                     var bsp = buildTree(scene(t));
-                    return view(render(_0))(bsp)();
+                    return view(render(_3))(bsp)();
                 };
             })();
         };
@@ -3666,7 +3673,7 @@ module.exports = {
     functorSplit: functorSplit
 };
 
-},{"Control.Monad.Eff":7,"Data.Array":10,"Data.Foldable":12,"Data.Maybe":14,"Data.Tuple":21,"Debug.Trace":22,"Graphics.Canvas":23,"Math":25,"Prelude":27}],25:[function(require,module,exports){
+},{"Control.Monad.Eff":7,"Control.MonadPlus":8,"Data.Array":10,"Data.Foldable":12,"Data.Maybe":14,"Data.Tuple":21,"Debug.Trace":22,"Graphics.Canvas":23,"Math":25,"Prelude":27}],25:[function(require,module,exports){
 // Generated by psc-make version 0.6.9.5
 "use strict";
 var Prelude = require("Prelude");
