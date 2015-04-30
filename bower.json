@@ -1,0 +1,19 @@
+{
+  "name": "purescript-bsp-experiment",
+  "version": "1.0.0",
+  "moduleType": [
+    "node"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "output"
+  ],
+  "dependencies": {
+    "purescript-arrays": "~0.3.7",
+    "purescript-foldable-traversable": "~0.3.1",
+    "purescript-canvas": "~0.2.0",
+    "purescript-math": "~0.1.1"
+  }
+}
