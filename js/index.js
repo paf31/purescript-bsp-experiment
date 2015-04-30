@@ -3115,9 +3115,9 @@ module.exports = {
 "use strict";
 var Prelude = require("Prelude");
 var Data_Foldable = require("Data.Foldable");
-var Debug_Trace = require("Debug.Trace");
 var Graphics_Canvas = require("Graphics.Canvas");
 var $$Math = require("Math");
+var Debug_Trace = require("Debug.Trace");
 var Data_Maybe = require("Data.Maybe");
 var Data_Tuple = require("Data.Tuple");
 var Control_Monad_Eff = require("Control.Monad.Eff");
@@ -3592,18 +3592,28 @@ var main = (function () {
     var render = function (ctx) {
         return function (r) {
             return function __do() {
-                Debug_Trace.print(showR)(r)();
-                var _81 = toPoints(r);
-                if (_81.length === 4) {
+                (function () {
+                    if (r instanceof XY) {
+                        return Graphics_Canvas.setFillStyle("rgb(48, 196, 255)")(ctx);
+                    };
+                    if (r instanceof YZ) {
+                        return Graphics_Canvas.setFillStyle("rgb(24, 144, 200)")(ctx);
+                    };
+                    if (r instanceof ZX) {
+                        return Graphics_Canvas.setFillStyle("rgb(0, 128, 196)")(ctx);
+                    };
+                    throw new Error("Failed pattern match");
+                })()();
+                var _85 = toPoints(r);
+                if (_85.length === 4) {
                     return Prelude["void"](Control_Monad_Eff.functorEff)(function __do() {
                         Graphics_Canvas.beginPath(ctx)();
-                        l2(ctx)(Graphics_Canvas.moveTo)(_81[0])();
-                        l2(ctx)(Graphics_Canvas.lineTo)(_81[1])();
-                        l2(ctx)(Graphics_Canvas.lineTo)(_81[2])();
-                        l2(ctx)(Graphics_Canvas.lineTo)(_81[3])();
+                        l2(ctx)(Graphics_Canvas.moveTo)(_85[0])();
+                        l2(ctx)(Graphics_Canvas.lineTo)(_85[1])();
+                        l2(ctx)(Graphics_Canvas.lineTo)(_85[2])();
+                        l2(ctx)(Graphics_Canvas.lineTo)(_85[3])();
                         Graphics_Canvas.closePath(ctx)();
-                        Graphics_Canvas.fill(ctx)();
-                        return Graphics_Canvas.stroke(ctx)();
+                        return Graphics_Canvas.fill(ctx)();
                     })();
                 };
                 throw new Error("Failed pattern match");
@@ -3614,7 +3624,8 @@ var main = (function () {
         var _1 = Graphics_Canvas.getCanvasElementById("canvas")();
         if (_1 instanceof Data_Maybe.Just) {
             var _0 = Graphics_Canvas.getContext2D(_1.value0)();
-            Graphics_Canvas.setFillStyle("rgba(48, 196, 255, 0.75)")(_0)();
+            Graphics_Canvas.setFillStyle("rgba(48, 196, 255, 0.25)")(_0)();
+            Graphics_Canvas.setFillStyle("white")(_0)();
             Graphics_Canvas.setStrokeStyle("rgba(0, 0, 0, 0.2)")(_0)();
             var bsp = buildTree(scene);
             return view(render(_0))(bsp)();

@@ -133,8 +133,8 @@ main = do
   Just canvas <- getCanvasElementById "canvas"
   ctx <- getContext2D canvas
 
-  setFillStyle "rgba(48, 196, 255, 0.75)" ctx
-  --setFillStyle "white" ctx
+  setFillStyle "rgba(48, 196, 255, 0.25)" ctx
+  setFillStyle "white" ctx
   setStrokeStyle "rgba(0, 0, 0, 0.2)" ctx
 
   let bsp = buildTree scene
@@ -143,7 +143,10 @@ main = do
   where
   render :: Context2D -> R -> Eff _ Unit
   render ctx r = do
-    print r
+    case r of
+      XY _ -> setFillStyle "rgb(48, 196, 255)" ctx
+      YZ _ -> setFillStyle "rgb(24, 144, 200)" ctx
+      ZX _ -> setFillStyle "rgb(0, 128, 196)" ctx
     case toPoints r of
       [p1, p2, p3, p4] -> void do
         beginPath ctx
@@ -153,7 +156,7 @@ main = do
         l2 ctx lineTo p4
         closePath ctx
         fill ctx
-        stroke ctx
+        --stroke ctx
 
   l2 ctx f p = case project p of
                o -> f ctx o.x o.y
