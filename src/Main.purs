@@ -124,10 +124,10 @@ cube x0 x1 y0 y1 z0 z1 =
   ]
 
 scene :: [R]
-scene = cube 10  90  10  90  0 120
-     ++ cube 10  90  60 180 30 120
-     ++ cube 60 180 100 180 60 120
-     ++ cube 100 180 10 120  90 120
+scene = cube   0 100   0 100   0 200
+     ++ cube   0 100  50 200  50 200
+     ++ cube  50 200 100 200 100 200
+     ++ cube 100 200   0 150 150 200
 
 main = do
   Just canvas <- getCanvasElementById "canvas"

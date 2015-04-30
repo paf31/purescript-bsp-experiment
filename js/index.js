@@ -3386,7 +3386,7 @@ var cube = function (x0) {
         };
     };
 };
-var scene = Prelude["++"](Data_Array.semigroupArray)(cube(10)(90)(10)(90)(0)(120))(Prelude["++"](Data_Array.semigroupArray)(cube(10)(90)(60)(180)(30)(120))(Prelude["++"](Data_Array.semigroupArray)(cube(60)(180)(100)(180)(60)(120))(cube(100)(180)(10)(120)(90)(120))));
+var scene = Prelude["++"](Data_Array.semigroupArray)(cube(0)(100)(0)(100)(0)(200))(Prelude["++"](Data_Array.semigroupArray)(cube(0)(100)(50)(200)(50)(200))(Prelude["++"](Data_Array.semigroupArray)(cube(50)(200)(100)(200)(100)(200))(cube(100)(200)(0)(150)(150)(200))));
 var buildTree = (function () {
     var splitZ = function (o) {
         return function (z) {
