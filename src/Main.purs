@@ -123,30 +123,39 @@ cube x0 x1 y0 y1 z0 z1 =
   , ZX { x: { min: x0, max: x1 }, y: y1, z: { min: z0, max: z1 } }
   ]
 
-scene :: [R]
-scene = cube   0 100   0 100   0 200
-     ++ cube   0 100  50 200  50 200
-     ++ cube  50 200 100 200 100 200
-     ++ cube 100 200   0 150 150 200
+scene :: Number -> [R]
+scene t = 
+  let h t = Math.sin t * 50 + 100
+  in cube   0 100   0 100 (h t) 200 ++ 
+     cube   0 100 100 200 (h (Math.pi * 0.5 + t)) 200 ++
+     cube 100 200 100 200 (h (Math.pi + t)) 200 ++
+     cube 100 200   0 100 (h (Math.pi * 1.5 + t)) 200
+
+foreign import fortyFps 
+  "function fortyFps(f) {\
+  \  return function() {\
+  \    window.setInterval(function() {\
+  \      f(new Date().getTime() / 1000.0)();\
+  \    }, 25);\
+  \  };\
+  \}" :: forall eff. (Number -> Eff eff Unit) -> Eff eff Unit
 
 main = do
   Just canvas <- getCanvasElementById "canvas"
   ctx <- getContext2D canvas
 
-  setFillStyle "rgba(48, 196, 255, 0.25)" ctx
-  setFillStyle "white" ctx
-  setStrokeStyle "rgba(0, 0, 0, 0.2)" ctx
-
-  let bsp = buildTree scene
-  view (render ctx) bsp
+  fortyFps \t -> do
+    clearRect ctx { x: 0, y: 0, w: 600, h: 600 }
+    let bsp = buildTree (scene t)
+    view (render ctx) bsp
 
   where
   render :: Context2D -> R -> Eff _ Unit
   render ctx r = do
     case r of
-      XY _ -> setFillStyle "rgb(48, 196, 255)" ctx
-      YZ _ -> setFillStyle "rgb(24, 144, 200)" ctx
-      ZX _ -> setFillStyle "rgb(0, 128, 196)" ctx
+      XY _ -> setFillStyle "rgba(48, 196, 255, 0.5)" ctx
+      YZ _ -> setFillStyle "rgba(24, 144, 200, 0.5)" ctx
+      ZX _ -> setFillStyle "rgba(0 , 128, 196, 0.5)" ctx
     case toPoints r of
       [p1, p2, p3, p4] -> void do
         beginPath ctx
@@ -156,7 +165,6 @@ main = do
         l2 ctx lineTo p4
         closePath ctx
         fill ctx
-        --stroke ctx
 
   l2 ctx f p = case project p of
                o -> f ctx o.x o.y

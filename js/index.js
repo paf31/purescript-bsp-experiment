@@ -3115,13 +3115,14 @@ module.exports = {
 "use strict";
 var Prelude = require("Prelude");
 var Data_Foldable = require("Data.Foldable");
-var Graphics_Canvas = require("Graphics.Canvas");
 var $$Math = require("Math");
+var Graphics_Canvas = require("Graphics.Canvas");
 var Debug_Trace = require("Debug.Trace");
 var Data_Maybe = require("Data.Maybe");
 var Data_Tuple = require("Data.Tuple");
 var Control_Monad_Eff = require("Control.Monad.Eff");
 var Data_Array = require("Data.Array");
+function fortyFps(f) {  return function() {    window.setInterval(function() {      f(new Date().getTime() / 1000.0)();    }, 25);  };};
 var Front = (function () {
     function Front() {
 
@@ -3386,7 +3387,12 @@ var cube = function (x0) {
         };
     };
 };
-var scene = Prelude["++"](Data_Array.semigroupArray)(cube(0)(100)(0)(100)(0)(200))(Prelude["++"](Data_Array.semigroupArray)(cube(0)(100)(50)(200)(50)(200))(Prelude["++"](Data_Array.semigroupArray)(cube(50)(200)(100)(200)(100)(200))(cube(100)(200)(0)(150)(150)(200))));
+var scene = function (t) {
+    var h = function (t_1) {
+        return $$Math.sin(t_1) * 50 + 100;
+    };
+    return Prelude["++"](Data_Array.semigroupArray)(cube(0)(100)(0)(100)(h(t))(200))(Prelude["++"](Data_Array.semigroupArray)(cube(0)(100)(100)(200)(h($$Math.pi * 0.5 + t))(200))(Prelude["++"](Data_Array.semigroupArray)(cube(100)(200)(100)(200)(h($$Math.pi + t))(200))(cube(100)(200)(0)(100)(h($$Math.pi * 1.5 + t))(200))));
+};
 var buildTree = (function () {
     var splitZ = function (o) {
         return function (z) {
@@ -3594,13 +3600,13 @@ var main = (function () {
             return function __do() {
                 (function () {
                     if (r instanceof XY) {
-                        return Graphics_Canvas.setFillStyle("rgb(48, 196, 255)")(ctx);
+                        return Graphics_Canvas.setFillStyle("rgba(48, 196, 255, 0.5)")(ctx);
                     };
                     if (r instanceof YZ) {
-                        return Graphics_Canvas.setFillStyle("rgb(24, 144, 200)")(ctx);
+                        return Graphics_Canvas.setFillStyle("rgba(24, 144, 200, 0.5)")(ctx);
                     };
                     if (r instanceof ZX) {
-                        return Graphics_Canvas.setFillStyle("rgb(0, 128, 196)")(ctx);
+                        return Graphics_Canvas.setFillStyle("rgba(0 , 128, 196, 0.5)")(ctx);
                     };
                     throw new Error("Failed pattern match");
                 })()();
@@ -3624,11 +3630,18 @@ var main = (function () {
         var _1 = Graphics_Canvas.getCanvasElementById("canvas")();
         if (_1 instanceof Data_Maybe.Just) {
             var _0 = Graphics_Canvas.getContext2D(_1.value0)();
-            Graphics_Canvas.setFillStyle("rgba(48, 196, 255, 0.25)")(_0)();
-            Graphics_Canvas.setFillStyle("white")(_0)();
-            Graphics_Canvas.setStrokeStyle("rgba(0, 0, 0, 0.2)")(_0)();
-            var bsp = buildTree(scene);
-            return view(render(_0))(bsp)();
+            return fortyFps(function (t) {
+                return function __do() {
+                    Graphics_Canvas.clearRect(_0)({
+                        x: 0, 
+                        y: 0, 
+                        w: 600, 
+                        h: 600
+                    })();
+                    var bsp = buildTree(scene(t));
+                    return view(render(_0))(bsp)();
+                };
+            })();
         };
         throw new Error("Failed pattern match");
     };
@@ -3643,6 +3656,7 @@ module.exports = {
     YZ: YZ, 
     ZX: ZX, 
     main: main, 
+    fortyFps: fortyFps, 
     scene: scene, 
     cube: cube, 
     toPoints: toPoints, 
