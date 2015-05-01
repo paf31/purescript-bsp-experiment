@@ -15,22 +15,9 @@ import Graphics.Canvas
 
 type Bounds = { min :: Number, max :: Number }
 
-data R = XY { x :: Bounds, y :: Bounds, z :: Number }
-       | YZ { x :: Number, y :: Bounds, z :: Bounds }
-       | ZX { x :: Bounds, y :: Number, z :: Bounds }
-
-instance showR :: Show R where
-  show (XY o) = "(XY [" ++ show o.x.min ++ ", " ++ show o.x.max ++ "]" ++
-                  ", [" ++ show o.y.min ++ ", " ++ show o.y.max ++ "]" ++
-                   ", " ++ show o.z ++ ")"
-  show (YZ o) = "(YZ " ++ show o.x ++
-                 ", [" ++ show o.y.min ++ ", " ++ show o.y.max ++ "]" ++
-                  ", [" ++ show o.z.min ++ ", " ++ show o.z.max ++ "])"
-  show (ZX o) = "(ZX [" ++ show o.x.min ++ ", " ++ show o.x.max ++ "]" ++
-                   ", " ++ show o.y ++
-                  ", [" ++ show o.z.min ++ ", " ++ show o.z.max ++ "])"
-
-data BSP = Leaf | Branch BSP R BSP
+data R = XY { x :: Bounds, y :: Bounds, z :: Number, a :: Number }
+       | YZ { x :: Number, y :: Bounds, z :: Bounds, a :: Number }
+       | ZX { x :: Bounds, y :: Number, z :: Bounds, a :: Number }
 
 data Split a = Front | Back | Split a a
 
@@ -39,17 +26,25 @@ instance functorSplit :: Functor Split where
   (<$>) _ Back  = Back
   (<$>) f (Split a b) = Split (f a) (f b)
 
-buildTree :: [R] -> BSP
-buildTree = foldl pushDown Leaf
+backToFront :: forall eff. (R -> Eff eff Unit) -> [R] -> Eff eff Unit
+backToFront f = go
   where
-  pushDown :: BSP -> R -> BSP
-  pushDown Leaf r = Branch Leaf r Leaf
-  pushDown (Branch front split back) r = 
-    case r `splitOn` split of
-      Front -> Branch (pushDown front r) split back
-      Back  -> Branch front split (pushDown back r)
-      Split r1 r2 -> Branch (pushDown front r1) split (pushDown back r2)
-
+  go [] = return unit
+  go (split : rest) = do
+    go do 
+      r <- rest 
+      case r `splitOn` split of
+        Back -> [r]
+        Split _ r1 -> [r1]
+        _ -> []
+    f split
+    go do 
+      r <- rest
+      case r `splitOn` split of
+        Front -> [r]
+        Split r1 _ -> [r1]
+        _ -> []
+  
   splitOn :: R -> R -> Split R
   splitOn (XY o1) (XY o2) | o1.z >= o2.z = Back
                           | otherwise    = Front
@@ -82,23 +77,6 @@ buildTree = foldl pushDown Leaf
              | otherwise = Split (o { z = { min: o.z.min, max: z } })
                                  (o { z = { max: o.z.max, min: z } })
 
-view :: forall eff. (R -> Eff eff Unit) -> BSP -> Eff eff Unit
-view render = go
-  where
-  go Leaf = return unit
-  go (Branch front r@(XY o) back) = do 
-    go back
-    render r
-    go front
-  go (Branch front r@(YZ o) back) = do 
-    go back
-    render r
-    go front
-  go (Branch front r@(ZX o) back) = do
-    go back
-    render r
-    go front
-
 toPoints :: R -> [{ x :: Number, y :: Number, z :: Number }]
 toPoints (XY o) = [ { x: o.x.min, y: o.y.min, z: o.z }
                   , { x: o.x.min, y: o.y.max, z: o.z } 
@@ -116,28 +94,30 @@ toPoints (ZX o) = [ { x: o.x.min, y: o.y, z: o.z.min }
                   , { x: o.x.max, y: o.y, z: o.z.min } 
                   ]
 
-cube :: Number -> Number -> Number -> Number -> Number -> Number -> [R]
-cube x0 x1 y0 y1 z0 z1 = 
-  [ XY { x: { min: x0, max: x1 }, y: { min: y0, max: y1 }, z: z0 }
-  , XY { x: { min: x0, max: x1 }, y: { min: y0, max: y1 }, z: z1 }
-  , YZ { x: x0, y: { min: y0, max: y1 }, z: { min: z0, max: z1 } }
-  , YZ { x: x1, y: { min: y0, max: y1 }, z: { min: z0, max: z1 } }
-  , ZX { x: { min: x0, max: x1 }, y: y0, z: { min: z0, max: z1 } }
-  , ZX { x: { min: x0, max: x1 }, y: y1, z: { min: z0, max: z1 } }
+cube :: Number -> Number -> Number -> Number -> Number -> Number -> Number -> [R]
+cube x0 x1 y0 y1 z0 z1 a =  
+  [ XY { x: { min: x0, max: x1 }, y: { min: y0, max: y1 }, z: z0, a: a }
+  , XY { x: { min: x0, max: x1 }, y: { min: y0, max: y1 }, z: z1, a: a }
+  , YZ { x: x0, y: { min: y0, max: y1 }, z: { min: z0, max: z1 }, a: a }
+  , YZ { x: x1, y: { min: y0, max: y1 }, z: { min: z0, max: z1 }, a: a }
+  , ZX { x: { min: x0, max: x1 }, y: y0, z: { min: z0, max: z1 }, a: a }
+  , ZX { x: { min: x0, max: x1 }, y: y1, z: { min: z0, max: z1 }, a: a }
   ]
 
 scene :: Number -> [R]
 scene t = do
-  let s = Math.sin (0.5 * t) * 10.0 + 30.0
-  x <- 0 .. 5
-  y <- 0 .. 5
-  z <- 0 .. 5
-  guard $ Math.sin (x + t * 2.1) + 
-          Math.sin (y + t * 2.2) + 
-          Math.cos (z + t * 2.3) > 1.0
+  let s = Math.sin (0.25 * t) * 8.0 + 40.0
+  x <- (-3) .. 3
+  y <- (-3) .. 3
+  z <- (-3) .. 3
+  let alpha = Math.sin (x + t * 2.1) + 
+              Math.sin (y + t * 2.2) + 
+              Math.cos (z + t * 2.3)
+  guard $ alpha > 0.5
   cube (x * s) (x * s + s)
-       (y * s) (y * s + s)
-       (z * s) (z * s + s)
+       (y * s) (y * s + s) 
+       (z * s) (z * s + s) 
+       alpha
 
 foreign import fortyFps 
   "function fortyFps(f) {\
@@ -153,17 +133,16 @@ main = do
   ctx <- getContext2D canvas
 
   fortyFps \t -> do
-    clearRect ctx { x: 0, y: 0, w: 600, h: 600 }
-    let bsp = buildTree (scene t)
-    view (render ctx) bsp
+    clearRect ctx { x: 0, y: 0, w: 1000, h: 1000 }
+    backToFront (render ctx t) (scene t)
 
   where
-  render :: Context2D -> R -> Eff _ Unit
-  render ctx r = do
+  render :: Context2D -> Number -> R -> Eff _ Unit
+  render ctx t r = do
     case r of
-      XY _ -> setFillStyle "rgba(48, 196, 255, 1.0)" ctx
-      YZ _ -> setFillStyle "rgba(24, 144, 200, 1.0)" ctx
-      ZX _ -> setFillStyle "rgba(0 , 128, 196, 1.0)" ctx
+      XY o -> setFillStyle ("rgba(48, 196, 255, " <> show o.a <> ")") ctx
+      YZ o -> setFillStyle ("rgba(24, 144, 200, " <> show o.a <> ")") ctx
+      ZX o -> setFillStyle ("rgba(0 , 128, 196, " <> show o.a <> ")") ctx
     case toPoints r of
       [p1, p2, p3, p4] -> void do
         beginPath ctx
@@ -173,17 +152,20 @@ main = do
         l2 ctx lineTo p4
         closePath ctx
         fill ctx
+    where
+    l2 ctx f p = case project p of
+                 o -> f ctx o.x o.y
 
-  l2 ctx f p = case project p of
-               o -> f ctx o.x o.y
+    theta :: Number
+    theta = Math.pi / 4 + Math.pi / 12 * Math.sin (t * 0.11)
 
-  cos20 :: Number
-  cos20 = Math.cos (Math.pi / 4)
+    c :: Number
+    c = Math.cos theta
 
-  sin20 :: Number
-  sin20 = Math.sin (Math.pi / 4)
+    s :: Number
+    s = Math.sin theta 
 
-  project :: { x :: Number, y :: Number, z :: Number } -> { x :: Number, y :: Number }
-  project o = { x: 300.0 + o.x * cos20 - o.y * sin20
-              , y: 100.0 + o.x * sin20 + o.y * cos20 + o.z
-              }
+    project :: { x :: Number, y :: Number, z :: Number } -> { x :: Number, y :: Number }
+    project o = { x: 500.0 + o.x * c - o.y * s
+                , y: 350.0 + o.x * s + o.y * c + o.z
+                }
