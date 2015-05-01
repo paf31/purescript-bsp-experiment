@@ -110,9 +110,11 @@ scene t = do
   x <- (-3) .. 3
   y <- (-3) .. 3
   z <- (-3) .. 3
+  let r = Math.abs x + Math.abs y + Math.abs z
   let alpha = Math.sin (x + t * 2.1) + 
               Math.sin (y + t * 2.2) + 
-              Math.cos (z + t * 2.3)
+              Math.cos (z + t * 2.3) + 
+              r / 7.5
   guard $ alpha > 0.5
   cube (x * s) (x * s + s)
        (y * s) (y * s + s) 

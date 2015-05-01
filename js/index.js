@@ -334,13 +334,15 @@ var PS = PS || {};
 PS.$$Math = (function () {
     "use strict";
     var Prelude = PS.Prelude;
+    var abs = Math.abs;;
     var cos = Math.cos;;
     var sin = Math.sin;;
     var pi      = Math.PI;;
     return {
         pi: pi, 
         sin: sin, 
-        cos: cos
+        cos: cos, 
+        abs: abs
     };
 })();
 var PS = PS || {};
@@ -839,7 +841,8 @@ PS.Main = (function () {
         return Prelude[">>="](Data_Array.bindArray)(Data_Array[".."](-3)(3))(function (_16) {
             return Prelude[">>="](Data_Array.bindArray)(Data_Array[".."](-3)(3))(function (_15) {
                 return Prelude[">>="](Data_Array.bindArray)(Data_Array[".."](-3)(3))(function (_14) {
-                    var alpha = $$Math.sin(_16 + t * 2.1) + $$Math.sin(_15 + t * 2.2) + $$Math.cos(_14 + t * 2.3);
+                    var r = $$Math.abs(_16) + $$Math.abs(_15) + $$Math.abs(_14);
+                    var alpha = $$Math.sin(_16 + t * 2.1) + $$Math.sin(_15 + t * 2.2) + $$Math.cos(_14 + t * 2.3) + r / 7.5;
                     return Prelude[">>="](Data_Array.bindArray)(Control_MonadPlus.guard(Data_Array.monadPlusArray)(alpha > 0.5))(function () {
                         return cube(_16 * s)(_16 * s + s)(_15 * s)(_15 * s + s)(_14 * s)(_14 * s + s)(alpha);
                     });
