@@ -10,6 +10,7 @@
     "bower_components",
     "output"
   ],
+  "license": "MIT",
   "dependencies": {
     "purescript-arrays": "~0.3.7",
     "purescript-foldable-traversable": "~0.3.1",
