@@ -1,17 +1,15 @@
 module Main where
 
-import Debug.Trace
-
-import Data.Maybe
-import Data.Array
-import Data.Tuple
-import Data.Foldable (foldl)
-
-import Control.MonadPlus
-
-import Control.Monad.Eff
-
-import Graphics.Canvas
+import Prelude
+import Math as Math
+import Control.Monad.Eff (Eff)
+import Control.MonadPlus (guard)
+import Data.Array ((..))
+import Data.Int (toNumber)
+import Data.List (List(..), fromFoldable)
+import Data.Maybe (fromMaybe')
+import Graphics.Canvas (CANVAS, Context2D, clearRect, getContext2D, getCanvasElementById, fill, closePath, lineTo, moveTo, beginPath, setFillStyle)
+import Partial.Unsafe (unsafeCrashWith)
 
 type Bounds = { min :: Number, max :: Number }
 
@@ -22,28 +20,28 @@ data R = XY { x :: Bounds, y :: Bounds, z :: Number, a :: Number }
 data Split a = Front | Back | Split a a
 
 instance functorSplit :: Functor Split where
-  (<$>) _ Front = Front
-  (<$>) _ Back  = Back
-  (<$>) f (Split a b) = Split (f a) (f b)
+  map _ Front = Front
+  map _ Back  = Back
+  map f (Split a b) = Split (f a) (f b)
 
-backToFront :: forall eff. (R -> Eff eff Unit) -> [R] -> Eff eff Unit
-backToFront f = go
+backToFront :: forall eff. (R -> Eff eff Unit) -> Array R -> Eff eff Unit
+backToFront f s = go $ fromFoldable s
   where
-  go [] = return unit
-  go (split : rest) = do
-    go do 
-      r <- rest 
+  go Nil = pure unit
+  go (Cons split rest) = do
+    go do
+      r <- rest
       case r `splitOn` split of
-        Back -> [r]
-        Split _ r1 -> [r1]
-        _ -> []
+        Back -> pure r
+        Split _ r1 -> pure r1
+        _ -> Nil
     f split
     go do 
       r <- rest
       case r `splitOn` split of
-        Front -> [r]
-        Split r1 _ -> [r1]
-        _ -> []
+        Front -> pure r
+        Split r1 _ -> pure r1
+        _ -> Nil
   
   splitOn :: R -> R -> Split R
   splitOn (XY o1) (XY o2) | o1.z >= o2.z = Back
@@ -77,7 +75,7 @@ backToFront f = go
              | otherwise = Split (o { z = { min: o.z.min, max: z } })
                                  (o { z = { max: o.z.max, min: z } })
 
-toPoints :: R -> [{ x :: Number, y :: Number, z :: Number }]
+toPoints :: R -> Array { x :: Number, y :: Number, z :: Number }
 toPoints (XY o) = [ { x: o.x.min, y: o.y.min, z: o.z }
                   , { x: o.x.min, y: o.y.max, z: o.z } 
                   , { x: o.x.max, y: o.y.max, z: o.z } 
@@ -94,7 +92,7 @@ toPoints (ZX o) = [ { x: o.x.min, y: o.y, z: o.z.min }
                   , { x: o.x.max, y: o.y, z: o.z.min } 
                   ]
 
-cube :: Number -> Number -> Number -> Number -> Number -> Number -> Number -> [R]
+cube :: Number -> Number -> Number -> Number -> Number -> Number -> Number -> Array R
 cube x0 x1 y0 y1 z0 z1 a =  
   [ XY { x: { min: x0, max: x1 }, y: { min: y0, max: y1 }, z: z0, a: a }
   , XY { x: { min: x0, max: x1 }, y: { min: y0, max: y1 }, z: z1, a: a }
@@ -104,12 +102,12 @@ cube x0 x1 y0 y1 z0 z1 a =
   , ZX { x: { min: x0, max: x1 }, y: y1, z: { min: z0, max: z1 }, a: a }
   ]
 
-scene :: Number -> [R]
+scene :: Number -> Array R
 scene t = do
   let s = Math.sin (0.25 * t) * 8.0 + 40.0
-  x <- (-3) .. 3
-  y <- (-3) .. 3
-  z <- (-3) .. 3
+  x <- map toNumber $ (-3) .. 3
+  y <- map toNumber $ (-3) .. 3
+  z <- map toNumber $ (-3) .. 3
   let r = Math.abs x + Math.abs y + Math.abs z
   let alpha = Math.sin (x + t * 2.1) + 
               Math.sin (y + t * 2.2) + 
@@ -121,25 +119,21 @@ scene t = do
        (z * s) (z * s + s) 
        alpha
 
-foreign import fortyFps 
-  "function fortyFps(f) {\
-  \  return function() {\
-  \    window.setInterval(function() {\
-  \      f(new Date().getTime() / 1000.0)();\
-  \    }, 25);\
-  \  };\
-  \}" :: forall eff. (Number -> Eff eff Unit) -> Eff eff Unit
+foreign import atFps :: forall e. Number -> (Number -> Eff e Unit) -> Eff e Unit
 
+main :: forall e. Eff (canvas :: CANVAS | e) Unit
 main = do
-  Just canvas <- getCanvasElementById "canvas"
+  mcanvas <- getCanvasElementById "canvas"
+  let canvas = fromMaybe' (\_ -> unsafeCrashWith "no canvas element") mcanvas
+
   ctx <- getContext2D canvas
 
-  fortyFps \t -> do
-    clearRect ctx { x: 0, y: 0, w: 1000, h: 1000 }
+  atFps 30.0 \t -> do
+    clearRect ctx { x: 0.0, y: 0.0, w: 1000.0, h: 1000.0 }
     backToFront (render ctx t) (scene t)
 
   where
-  render :: Context2D -> Number -> R -> Eff _ Unit
+  render :: Context2D -> Number -> R -> Eff (canvas :: CANVAS | e) Unit
   render ctx t r = do
     case r of
       XY o -> setFillStyle ("rgba(48, 196, 255, " <> show o.a <> ")") ctx
@@ -154,12 +148,12 @@ main = do
         l2 ctx lineTo p4
         closePath ctx
         fill ctx
+      _  -> unsafeCrashWith "bad points"
     where
-    l2 ctx f p = case project p of
-                 o -> f ctx o.x o.y
+    l2 ctx f p = let o = project p in f ctx o.x o.y
 
     theta :: Number
-    theta = Math.pi / 4 + Math.pi / 12 * Math.sin (t * 0.11)
+    theta = Math.pi / 4.0 + Math.pi / 12.0 * Math.sin (t * 0.11)
 
     c :: Number
     c = Math.cos theta
