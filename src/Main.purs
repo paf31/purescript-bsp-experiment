@@ -129,28 +129,29 @@ main = do
   ctx <- getContext2D canvas
 
   atFps 30.0 \t -> do
-    clearRect ctx { x: 0.0, y: 0.0, w: 1000.0, h: 1000.0 }
+    void $ clearRect ctx { x: 0.0, y: 0.0, w: 1000.0, h: 1000.0 }
     backToFront (render ctx t) (scene t)
 
   where
   render :: Context2D -> Number -> R -> Eff (canvas :: CANVAS | e) Unit
   render ctx t r = do
-    case r of
+    void case r of
       XY o -> setFillStyle ("rgba(48, 196, 255, " <> show o.a <> ")") ctx
       YZ o -> setFillStyle ("rgba(24, 144, 200, " <> show o.a <> ")") ctx
       ZX o -> setFillStyle ("rgba(0 , 128, 196, " <> show o.a <> ")") ctx
     case toPoints r of
-      [p1, p2, p3, p4] -> void do
-        beginPath ctx
-        l2 ctx moveTo p1
-        l2 ctx lineTo p2
-        l2 ctx lineTo p3
-        l2 ctx lineTo p4
-        closePath ctx
-        fill ctx
+      [p1, p2, p3, p4] -> do
+        void $ beginPath ctx
+        l2 moveTo p1
+        l2 lineTo p2
+        l2 lineTo p3
+        l2 lineTo p4
+        void $ closePath ctx
+        void $ fill ctx
       _  -> unsafeCrashWith "bad points"
+    pure unit
     where
-    l2 ctx f p = let o = project p in f ctx o.x o.y
+    l2 f p = let o = project p  in void $ f ctx o.x o.y
 
     theta :: Number
     theta = Math.pi / 4.0 + Math.pi / 12.0 * Math.sin (t * 0.11)
@@ -165,3 +166,4 @@ main = do
     project o = { x: 500.0 + o.x * c - o.y * s
                 , y: 350.0 + o.x * s + o.y * c + o.z
                 }
+

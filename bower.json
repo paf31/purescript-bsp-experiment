@@ -12,11 +12,11 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "purescript-arrays": "^3.0.0",
-    "purescript-foldable-traversable": "^2.0.0",
-    "purescript-integers": "^2.0.0",
-    "purescript-canvas": "^2.0.0",
-    "purescript-lists": "^3.0.0",
+    "purescript-arrays": "^4.0.0",
+    "purescript-foldable-traversable": "^3.0.0",
+    "purescript-integers": "^3.0.0",
+    "purescript-canvas": "^3.0.0",
+    "purescript-lists": "^4.0.0",
     "purescript-math": "^2.0.0"
   }
 }
